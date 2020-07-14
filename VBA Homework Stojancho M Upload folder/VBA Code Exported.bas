@@ -1,0 +1,194 @@
+Attribute VB_Name = "Module1"
+Sub Stock_Sumarizer()
+
+Dim ws As Worksheet
+  ' Begin the loop to have the code working on all sheets
+For Each ws In Worksheets
+
+
+  'Define variables
+  Dim Stock_Name As String
+  
+  Dim I As Variant
+  
+  Dim Total_volume As Double
+  Total_volume = 0
+
+  Dim Ticker_Row_tracker As Integer
+  Ticker_Row_tracker = 2
+  
+  Dim first_time_same_counter As Integer
+  first_time_same_counter = 0
+  
+  Dim open_price As Double
+  open_price = 0
+  
+  Dim close_price As Double
+  close_price = 0
+  
+  Dim Yearly_change As Double
+  
+  Dim Percent_change As Variant
+    
+  Dim Greatest_TV As Double
+  
+  Dim Greatest_Percent_Increase As Double
+  
+  Dim RowCountA As Long
+  
+  Dim RowCountL As Integer
+  
+  
+     
+    
+
+         
+  ' get the row number of the last row with data at colum A
+  
+    RowCountA = ws.Cells(Rows.Count, "A").End(xlUp).Row
+  
+  ' As a test put to 500, change to last cell of workseet later, aquired by RowcountA
+  For I = 2 To RowCountA
+
+    If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
+
+      ' Set the stock name. First time the two ticker will be diferent, the if statement will activate and the name of the stock will be cell(i,7)
+      Stock_Name = ws.Cells(I, 1).Value
+
+      ' Add to the Total volume. The total volume was summarizing every time the if statement did not activate, since the stock was same.
+      ' This will be the last addition before reseting to 0.
+      Total_volume = Total_volume + ws.Cells(I, 7).Value
+
+      ' Print the stock name in the ticker colum
+      ws.Range("I" & Ticker_Row_tracker).Value = Stock_Name
+
+      ' Print the Total volume to the volume colum
+      ws.Range("L" & Ticker_Row_tracker).Value = Total_volume
+              
+      ' Remembers the close price
+      close_price = ws.Cells(I, 6).Value
+      
+      ' Calculates yearly change
+      Yearly_change = close_price - open_price
+      
+      ' Prints yearly change
+      ws.Range("J" & Ticker_Row_tracker).Value = Yearly_change
+      
+      'Formats the cell color depending on value of Yearly_change
+        If Yearly_change > 0 Then
+            ws.Range("J" & Ticker_Row_tracker).Interior.ColorIndex = 4
+        Else
+            ws.Range("J" & Ticker_Row_tracker).Interior.ColorIndex = 3
+        
+        End If
+         
+         
+      'Checks to see if open_price is 0 to avoid division by 0
+        If open_price = 0 Then
+            ws.Range("K" & Ticker_Row_tracker).Value = "0"
+            
+        Else
+        
+            'Calculates percent_change
+            Percent_change = Yearly_change / open_price * 100
+     
+      
+            'formats percent_change to 2 decimals and sign %
+            Percent_change = Format(Percent_change, "%0.00")
+      
+          
+            'prints percent change
+            ws.Range("K" & Ticker_Row_tracker).Value = Percent_change
+            
+         End If
+         
+      
+      ' Add one to the Ticker_Row_tracker
+      Ticker_Row_tracker = Ticker_Row_tracker + 1
+      
+      ' Reset the Total_volume
+      Total_volume = 0
+      
+      ' Resets the first time counter
+      first_time_same_counter = 0
+      
+
+    'If the cell immediately following a row is the same brand......
+    Else
+
+      ' Add to the Brand Total
+      Total_volume = Total_volume + ws.Cells(I, 7).Value
+
+    End If
+    
+    'Finds and stores the open_price value
+    
+    If first_time_same_counter = 0 Then
+    
+        If ws.Cells(I + 1, 1).Value = ws.Cells(I, 1).Value Then
+        
+        open_price = ws.Cells(I, 3).Value
+        
+        first_time_same_counter = first_time_same_counter + 1
+        
+        End If
+    End If
+    
+  Next I
+  
+  '********CHALENGES********
+  
+   Dim Greatest_Percent_Decrease As Double
+     
+   'Initial values that i compare with,
+   'and print in case the first value is the greatest
+   
+    Greatest_TV = ws.Cells(2, 12).Value
+    ws.Range("Q4").Value = Greatest_TV
+    ws.Range("P4").Value = ws.Cells(2, 9).Value
+   
+    Greatest_Percent_Increase = ws.Cells(2, 11).Value
+    ws.Range("Q2").Value = Greatest_Percent_Increase
+    ws.Range("P2").Value = ws.Cells(2, 9).Value
+   
+    Greatest_Percent_Decrease = ws.Cells(2, 11).Value
+    ws.Range("Q3").Value = Greatest_Percent_Decrease
+    ws.Range("P3").Value = ws.Cells(2, 9).Value
+    
+    ' get the row number of the last row with data at colum L
+  
+    RowCountL = ws.Cells(Rows.Count, "L").End(xlUp).Row
+   
+For I = 2 To RowCountL
+   
+    If ws.Cells(I + 1, 12).Value > Greatest_TV Then
+    
+        Greatest_TV = ws.Cells(I + 1, 12).Value
+        ws.Range("Q4").Value = Greatest_TV
+        ws.Range("P4").Value = ws.Cells(I + 1, 9).Value
+    
+    End If
+       
+    If ws.Cells(I + 1, 11).Value > Greatest_Percent_Increase Then
+    
+        Greatest_Percent_Increase = ws.Cells(I + 1, 11).Value
+        ws.Range("Q2").Value = Greatest_Percent_Increase
+        ws.Range("P2").Value = ws.Cells(I + 1, 9).Value
+    
+    End If
+    
+    If ws.Cells(I + 1, 11).Value < Greatest_Percent_Decrease Then
+    
+        Greatest_Percent_Decrease = ws.Cells(I + 1, 11).Value
+        ws.Range("Q3").Value = Greatest_Percent_Decrease
+        ws.Range("P3").Value = ws.Cells(I + 1, 9).Value
+    
+    End If
+    
+Next I
+  
+Next ws
+    
+
+End Sub
+
